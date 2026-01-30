@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Eli 💖</title>
+
+<style>
+*{box-sizing:border-box;font-family:'Comic Sans MS',cursive}
+body{
+  margin:0;
+  background:linear-gradient(135deg,#ffc1d9,#ffe4ec);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  overflow-y:auto;
+}
+section{
+  width:100%;
+  min-height:100vh;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:40px 20px;
+  animation:fade .6s ease;
+}
+@keyframes fade{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+
+button{
+  border:none;
+  padding:14px 22px;
+  border-radius:25px;
+  background:#ff8fab;
+  color:white;
+  font-size:15px;
+  cursor:pointer;
+}
+.btn-main{background:#ff4d6d;font-weight:bold}
+
+/* GIFT */
+#page-1{display:flex}
+.gift{
+  width:150px;height:120px;
+  background:#ff6f91;
+  border-radius:12px;
+  position:relative;
+  cursor:pointer;
+  animation:float 2s infinite ease-in-out;
+}
+.gift::before{
+  content:'';
+  position:absolute;
+  width:100%;height:25px;
+  background:#ff4d6d;
+  top:-25px;border-radius:10px;
+}
+.bow{
+  position:absolute;
+  top:-40px;left:50%;
+  transform:translateX(-50%);
+  width:60px;height:30px;
+  background:#ff4d6d;
+  border-radius:50%;
+}
+.tap{margin-top:25px;color:#ff4d6d}
+@keyframes float{0%,100%{transform:none}50%{transform:translateY(-10px)}}
+
+/* BOM */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(5,55px);
+  gap:10px;
+  max-width:90vw;
+}
+.cell{
+  width:55px;height:55px;
+  background:white;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  cursor:pointer;
+}
+.cell.safe{background:#ffc2d1;color:#ff4d6d}
+.cell.bomb{background:#333;color:white}
+
+/* MEMORY */
+.memory-grid{
+  display:grid;
+  grid-template-columns:repeat(4,65px);
+  gap:10px;
+  margin-top:20px;
+}
+.card{
+  width:65px;height:80px;
+  background:#ff8fab;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  cursor:pointer;
+}
+.card.flipped{background:white}
+
+/* PHOTO */
+.photo{
+  width:150px;height:150px;
+  border-radius:50%;
+  object-fit:cover;
+  border:5px solid white;
+  margin-bottom:20px;
+  box-shadow:0 10px 20px rgba(0,0,0,.1);
+}
+
+/* SURAT */
+#surat-text{
+  font-size:15px;
+  line-height:1.8;
+  color:#444;
+}
+</style>
+</head>
+
+<body>
+
+<audio id="bgm" src="sky.mp3" loop></audio>
+<audio id="typingSound" src="typing.mp3"></audio>
+
+<section id="page-1">
+  <div class="gift" onclick="openGift()"><div class="bow"></div></div>
+  <div class="tap">Tap untuk membuka hadiahnya 💖</div>
+</section>
+
+<section id="page-2">
+  <h1>Hi Eli 😊</h1>
+  <button class="btn-main" onclick="showGift()">Hadiah Utama 🎁</button><br><br>
+  <button onclick="startBomb()">Game Bom 💣</button><br><br>
+  <button onclick="startMemory()">Memory Game 🧩</button>
+</section>
+
+<section id="page-bomb">
+  <h1>Cari yang Aman 💣</h1>
+  <div class="grid" id="bombGrid"></div>
+</section>
+
+<section id="page-nyanyi">
+  <h1>Yeayyy 🎉</h1>
+  <p>Kamu berhasil 💖<br><br><b>Aku bakal nyanyiin 2 lagu buat kamu 🎶</b></p>
+  <button onclick="backMenu()">Balik ke Menu 💗</button>
+</section>
+
+<section id="page-jengkol">
+  <h1>😈 KENA JENGKOL</h1>
+  <input id="jengkolAnswer" placeholder="Jawaban kamu..."><br><br>
+  <button onclick="submitJengkol()">Kirim</button>
+</section>
+
+<section id="page-memory">
+  <h1>Cocokin Gambar 🧠</h1>
+  <div class="memory-grid" id="memoryGrid"></div>
+</section>
+
+<section id="page-marsha">
+  <h1>😈 SALAH</h1>
+  <input id="marshaAnswer" placeholder="Jawaban kamu..."><br><br>
+  <button onclick="submitMarsha()">Kirim</button>
+</section>
+
+<section id="page-ganteng">
+  <h1>😎 MENANG</h1>
+  <img src="ganteng.jpg" class="photo">
+  <button onclick="backMenu()">Balik ke Menu 💗</button>
+</section>
+
+<section id="page-gift">
+  <img src="eli.jpg" class="photo">
+  <div id="surat-text"></div><br>
+  <button onclick="backMenu()">Kembali 💗</button>
+</section>
+
+<script>
+const pages=document.querySelectorAll("section");
+const bgm=document.getElementById("bgm");
+const typingSound=document.getElementById("typingSound");
+let typingTimeout;
+
+const suratLengkap=`Selamat ulang tahun.
+
+Di hari ini, namamu datang pelan,
+membawa ingatan yang hangat,
+tanpa perlu dijelaskan dengan apa pun.
+
+Mungkin kita sedang belajar menjaga jarak,
+tapi rasa tidak selalu ikut menjauh.
+Ada bagian darimu yang tetap tinggal,
+menjadi tenang di sela-sela pikiranku.
+
+Aku percaya waktu punya caranya sendiri,
+untuk merapikan hal-hal yang sempat berantakan.
+
+Semoga pesanku ini bisa memelukmu dengan lembut,
+Jika lelah datang diam-diam,
+semoga hadiah kecil ini memberi kehangatan.
+
+Dan kalau suatu hari nanti
+kamu sudah lebih tenang,
+hatimu lebih ringan dari hari-hari kemarin,
+jangan sungkan untuk bicara sama aku lagi ya…
+
+Aku ada.
+Selalu ada, Eli 😁`;
+
+function showPage(id){
+  pages.forEach(p=>p.style.display="none");
+  document.getElementById(id).style.display="flex";
+}
+
+function openGift(){
+  bgm.volume=0; bgm.play();
+  let v=0; let fade=setInterval(()=>{v+=0.05; bgm.volume=v;if(v>=1)clearInterval(fade)},200);
+  showPage("page-2");
+}
+
+function backMenu(){showPage("page-2")}
+
+/* BOM */
+function startBomb(){
+  showPage("page-bomb");
+  const grid=document.getElementById("bombGrid");
+  grid.innerHTML="";
+  const bomb=Math.floor(Math.random()*25);
+  let safeCount=0;
+  for(let i=0;i<25;i++){
+    const c=document.createElement("div");
+    c.className="cell";
+    c.onclick=()=>{
+      if(c.clicked)return;
+      c.clicked=true;
+      if(i===bomb){
+        c.textContent="💣";c.classList.add("bomb");
+        setTimeout(()=>showPage("page-jengkol"),600);
+      }else{
+        c.textContent="💖";c.classList.add("safe");
+        safeCount++;
+        if(safeCount===24)setTimeout(()=>showPage("page-nyanyi"),600);
+      }
+    };
+    grid.appendChild(c);
+  }
+}
+
+/* MEMORY */
+function startMemory(){
+  showPage("page-memory");
+  const grid=document.getElementById("memoryGrid");
+  grid.innerHTML="";
+  const icons=['🌸','🌸','🎀','🎀','⭐','⭐','🍭','🍭'];
+  const shuffled=icons.sort(()=>Math.random()-0.5);
+  let open=[];
+  shuffled.forEach(icon=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.onclick=()=>{
+      if(open.length===2||card.classList.contains("flipped"))return;
+      card.textContent=icon;card.classList.add("flipped");
+      open.push(card);
+      if(open.length===2){
+        if(open[0].textContent===open[1].textContent){
+          open=[];
+          if(document.querySelectorAll(".card.flipped").length===8)
+            setTimeout(()=>showPage("page-ganteng"),600);
+        }else setTimeout(()=>showPage("page-marsha"),600);
+      }
+    };
+    grid.appendChild(card);
+  });
+}
+
+function submitJengkol(){
+  alert("Wkwkwk ada-ada aja 😂");
+  backMenu();
+}
+function submitMarsha(){
+  alert("Wkwkwk ada-ada aja 😂");
+  backMenu();
+}
+
+/* SURAT */
+function showGift(){
+  showPage("page-gift");
+  typeWriter(suratLengkap,"surat-text",80);
+}
+function typeWriter(text,id,speed){
+  clearTimeout(typingTimeout);
+  const el=document.getElementById(id);
+  el.innerHTML="";let i=0;
+  function type(){
+    if(i<text.length){
+      el.innerHTML+=text[i]==="\n"?"<br>":text[i];
+      typingSound.currentTime=0;typingSound.play().catch(()=>{});
+      i++;typingTimeout=setTimeout(type,speed);
+    }
+  }
+  type();
+}
+</script>
+
+</body>
+</html>
